@@ -11,6 +11,7 @@ A local-first visual comparison tool for exported [Shesha](https://github.com/sh
 - Separates component, form-setting, script, expression, and ordering changes.
 - Ignores object-key ordering while preserving meaningful array ordering.
 - Switches between Side by Side and Inline views for settings, scripts, validators, and dynamic expressions, with additions and removals highlighted.
+- Reviews recognised scripts for console usage, potentially sensitive logging, and JavaScript parsing concerns in a separate **Review Concerns** tab.
 - Exports a deterministic Markdown report for reviews and pull requests.
 - Optionally asks a user-selected AI provider to explain the computed diff.
 
@@ -49,6 +50,18 @@ Component discovery includes direct children, wizard steps, tabs, columns, and p
 Scripts inside action/configuration arrays have their own diffs under the owning component. Configured items, buttons, and actions are grouped by their names, with changed settings and scripts nested underneath. Wizard steps show their number and configured title (falling back to label, name, or just the number). Numbers use the After order, or the Before order for removed steps. Array items are matched by ID or key where available (otherwise by position); ordering changes are shown separately. Exact configuration paths remain available on hover and in exported reports.
 
 Table entries also use column captions, dialog titles, bound property names, or action names when a button label is unavailable.
+
+## Review Concerns
+
+This read-only review runs locally using Acorn's JavaScript parser and AST walker. Uploaded scripts are never executed. Findings remain separate from configuration-diff counts and the Markdown diff report; AI is not used for these checks.
+
+- **Console usage:** direct calls such as `console.log`, `console.error`, static bracket access, and supported browser-global equivalents. Comments, string contents, and locally declared `console` objects are not treated as browser console calls. `console.error` is logging, not a thrown exception.
+- **Sensitive logging:** heuristics for full form/request objects and personal or secret-looking arguments, including email, mobile and password fields. A warning is a review prompt, not proof that sensitive information is present or exposed.
+- **Syntax review:** parsing failures with original script line/column locations. Function-body `return` and `await` are accepted, and Shesha-provided variables are not reported as undefined. This is not runtime execution or validation against every Shesha editor/version.
+
+Both exports are scanned, including unchanged scripts and scripts in added/removed components. Findings are **New**, **Existing**, or **Resolved**, matched by script identity and parsed statement rather than line number. **Unverified** means a version could not be fully checked, so introduction/resolution cannot be established. Syntax failures stop console analysis for that script; scripts over 250,000 characters or parser resource limits are explicitly reported as incomplete.
+
+The review recognises explicit `_code` settings and known raw script fields, including lifecycle hooks, action expressions and form arguments. Inactive value-mode code is skipped. It does not trace console aliases, dynamically computed methods, runtime values, or data flow; unknown/custom script fields may not be recognised. No findings does not certify that a form is safe or correct. Evidence and full scripts are shown as text and may contain sensitive data, so review screenshots before sharing them.
 
 ## Local Development
 
@@ -104,6 +117,7 @@ src/
     files/           Export parsing and validation
     forms/           Shared component structure discovery
     report/          Local Markdown report generation
+    review/          Local script collection, AST checks and finding comparison
 tests/               Unit tests for comparison behavior
 e2e/                 Browser workflow tests
 ```

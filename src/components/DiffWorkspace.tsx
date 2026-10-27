@@ -1,4 +1,4 @@
-import { CodeOutlined, FileSearchOutlined, RobotOutlined } from '@ant-design/icons';
+import { AuditOutlined, CodeOutlined, FileSearchOutlined, RobotOutlined } from '@ant-design/icons';
 import { Empty, Spin, Tabs } from 'antd';
 import { lazy, Suspense, useMemo, useState } from 'react';
 import type { IAiSettings } from '../types/ai';
@@ -11,6 +11,7 @@ import { ChangeNavigation } from './ChangeNavigation';
 
 const AiExplanationPanel = lazy(() => import('./AiExplanationPanel'));
 const RawComparison = lazy(() => import('./RawComparison'));
+const ReviewConcernsPanel = lazy(() => import('./ReviewConcernsPanel'));
 
 interface IDiffWorkspaceProps {
   afterForm: IUploadedForm;
@@ -66,6 +67,16 @@ export const DiffWorkspace = ({
             icon: <FileSearchOutlined />,
             key: 'changes',
             label: 'Changes',
+          },
+          {
+            children: (
+              <Suspense fallback={<Spin fullscreen={false} />}>
+                <ReviewConcernsPanel afterForm={afterForm} beforeForm={beforeForm} />
+              </Suspense>
+            ),
+            icon: <AuditOutlined />,
+            key: 'review',
+            label: 'Review Concerns',
           },
           {
             children: (
