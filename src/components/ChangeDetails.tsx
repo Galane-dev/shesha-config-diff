@@ -83,6 +83,7 @@ export const ChangeDetails = ({ selection }: IChangeDetailsProps): React.JSX.Ele
 
         {component && component.propertyChanges.length > 0 && (
           <Collapse
+            key={component.id}
             defaultActiveKey={[component.propertyChanges[0]?.id ?? '']}
             items={createCollapseItems(selection, viewMode)}
             size="small"

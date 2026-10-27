@@ -44,6 +44,8 @@ The current comparer expects the standard Shesha form export structure:
 
 Files with duplicate or missing component IDs are accepted with warnings. Components without IDs fall back to location-based matching, which is less reliable after large structural edits.
 
+Component discovery includes direct children, wizard steps, tabs, columns, and panel header/content slots. Child changes are listed individually; parent comparisons retain the container settings without duplicating its child definitions.
+
 ## Local Development
 
 Prerequisites:
@@ -96,6 +98,7 @@ src/
     ai/              Provider adapters and redaction
     diff/            Deterministic comparison engine
     files/           Export parsing and validation
+    forms/           Shared component structure discovery
     report/          Local Markdown report generation
 tests/               Unit tests for comparison behavior
 e2e/                 Browser workflow tests
