@@ -215,6 +215,11 @@ export const useAppStyles = createStyles(({ css, token }) => ({
     font-size: 12px;
     overflow-wrap: anywhere;
   `,
+  diffViewToolbar: css`
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 14px;
+  `,
   fileActions: css`
     display: flex;
     align-items: center;
@@ -313,6 +318,19 @@ export const useAppStyles = createStyles(({ css, token }) => ({
   headerTitleText: css`
     display: grid;
     gap: 1px;
+  `,
+  inlineLineNumber: css`
+    width: 52px;
+    padding-inline: 7px;
+    text-align: right;
+  `,
+  inlineMarker: css`
+    width: 22px;
+  `,
+  inlineRow: css`
+    td {
+      vertical-align: top;
+    }
   `,
   listToolbar: css`
     display: grid;

@@ -14,7 +14,14 @@ const createOneSidedDiff = (beforeLines: string[], afterLines: string[]): ILineD
   })),
 ];
 
-export const createLineDiff = (before: string, after: string): ILineDiffEntry[] => {
+export const createLineDiff = (
+  before: string | undefined,
+  after: string | undefined,
+): ILineDiffEntry[] => {
+  if (before === undefined || after === undefined) {
+    return createOneSidedDiff(before?.split('\n') ?? [], after?.split('\n') ?? []);
+  }
+
   const result: ILineDiffEntry[] = [];
   let lineNumberBefore = 1;
   let lineNumberAfter = 1;
@@ -38,9 +45,7 @@ export const createSideBySideDiff = (
   before: string | undefined,
   after: string | undefined,
 ): ISideBySideDiffRow[] => {
-  const lines = before === undefined || after === undefined
-    ? createOneSidedDiff(before?.split('\n') ?? [], after?.split('\n') ?? [])
-    : createLineDiff(before, after);
+  const lines = createLineDiff(before, after);
   const rows: ISideBySideDiffRow[] = [];
   let removed: ILineDiffEntry[] = [];
   let added: ILineDiffEntry[] = [];
