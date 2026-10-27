@@ -69,7 +69,7 @@ describe('script parsing and console review', () => {
     expect(result.findings[0]?.message).toContain('not proof of disclosure');
   });
 
-  it.each(['console.log("Password updated")', 'console.log(data.status)', 'console.log(response.data.totalCount)', 'console.log(42)'])(
+  it.each(['console.log("Password updated")', 'console.log("Office Bearer Information")', 'console.log(data.status)', 'console.log(response.data.totalCount)', 'console.log(42)'])(
     'does not classify ordinary messages and fields as sensitive: %s', (source) => {
     expect(analyze(source).findings[0]?.rule).toBe('console-usage');
   });

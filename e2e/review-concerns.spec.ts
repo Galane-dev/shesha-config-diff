@@ -35,15 +35,15 @@ test('reviews console usage, sensitive logging and syntax without executing scri
   const navigation = panel.getByRole('navigation', { name: 'Review findings' });
   const entries = navigation.getByRole('button');
   const details = panel.getByRole('article', { name: 'Review finding' });
-  await expect(entries).toHaveCount(6);
-  await expect(panel.getByText('New: 4', { exact: true })).toBeVisible();
+  await expect(entries).toHaveCount(8);
+  await expect(panel.getByText('New: 6', { exact: true })).toBeVisible();
   await expect(panel.getByText('Existing: 1', { exact: true })).toBeVisible();
   await expect(panel.getByText('Resolved: 1', { exact: true })).toBeVisible();
   await entries.filter({ hasText: 'Console usage: console.error' }).click();
   await expect(details).toContainText('does not itself throw an exception');
   const status = panel.getByRole('radiogroup', { name: 'Finding status' });
   await status.getByText('New', { exact: true }).click();
-  await expect(entries).toHaveCount(4);
+  await expect(entries).toHaveCount(6);
   await status.getByText('Existing', { exact: true }).click();
   await expect(entries).toHaveCount(1);
   await expect(details).toContainText('console.info');
@@ -104,5 +104,5 @@ test('marks older logging unverified when a later script has invalid syntax', as
 test('has an empty state for scripts with no supported findings', async ({ page }) => {
   const form = { components: [], formSettings: { onAfterDataLoad: 'return data;' } };
   await upload(page, form, form);
-  await expect(page.getByText('No review findings in recognised scripts')).toBeVisible();
+  await expect(page.getByText('No review findings in recognised scripts or configuration')).toBeVisible();
 });

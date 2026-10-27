@@ -51,4 +51,14 @@ describe('script collection', () => {
     const result = collectScripts({ components: [component, component], formSettings: {} });
     expect(new Set(result.map((script) => script.id)).size).toBe(2);
   });
+
+  it('records synchronous settings and asynchronous completion-sensitive hook contexts', () => {
+    const result = collectScripts({ components: [{ id: 'wizard', type: 'wizard', steps: [{
+      id: 'one', customVisibility: 'return true;',
+      beforeNextActionConfiguration: { actionArguments: { expression: 'return data;' } },
+    }] }], formSettings: { onBeforeSubmit: 'return data;' } });
+    expect(result.find((script) => script.path.endsWith('customVisibility'))?.executionContext).toBe('sync');
+    expect(result.find((script) => script.path.endsWith('expression'))?.requiresCompletion).toBe(true);
+    expect(result.find((script) => script.path === 'formSettings.onBeforeSubmit')?.executionContext).toBe('async');
+  });
 });
