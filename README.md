@@ -22,11 +22,14 @@ There is no application backend.
 
 - Form parsing and comparison run entirely in the browser.
 - Uploaded files are not persisted and are cleared when the page is closed or refreshed.
-- AI provider settings, including the API key, are stored unencrypted in browser local storage when the user saves them.
+- Only non-secret AI preferences (provider, model, and endpoint) are saved in browser local storage.
+- The API key stays in memory only. Refreshing or closing the page forgets it; **Clear key** removes it from the active settings without resetting saved preferences.
 - An AI request is made only when the user selects **Explain diff**.
 - Only the computed diff is sent. Likely credentials and tokens are redacted first; raw form exports are not sent.
 
-Use AI provider settings only on a trusted device. A provider may also reject direct browser requests because of its CORS policy.
+Memory-only storage reduces persistent exposure; it does not hide the key from page scripts, privileged browser extensions, device malware, or browser request inspection while it is in use. Use a trusted device and browser, and send keys only to trusted HTTPS provider endpoints. Use a dedicated, restricted key and provider-supported usage controls. If a key may have been exposed, revoke or rotate it with the provider; clearing it here does not revoke it.
+
+A provider may also reject direct browser requests because of its CORS policy. Do not route keys through an untrusted proxy to bypass that restriction. See [SECURITY.md](SECURITY.md) for further precautions.
 
 ## Supported Export Shape
 
