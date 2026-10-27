@@ -67,7 +67,7 @@ export const ChangeNavigation = ({
             onClick={() => onSelect(selection.id)}
             type="button"
           >
-            <span className={styles.changeListTitle} title={selection.label}>
+            <span className={styles.changeListTitle} title={selection.value?.path ?? selection.label}>
               {selection.isScript && <CodeOutlined style={{ marginRight: 6 }} />}
               {selection.label}
             </span>
