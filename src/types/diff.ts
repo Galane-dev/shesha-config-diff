@@ -4,6 +4,7 @@ import type { IFormMetadata, ISheshaComponent } from './shesha-form';
 export type DiffChangeType = 'added' | 'modified' | 'moved' | 'removed';
 export type DiffScope = 'component' | 'form-setting';
 export type DiffFilter = 'all' | 'components' | 'form-settings' | 'scripts';
+export type DiffViewMode = 'side-by-side' | 'inline';
 
 export interface IValueChange {
   after?: JsonValue;
@@ -55,4 +56,9 @@ export interface ILineDiffEntry {
   lineNumberAfter?: number;
   lineNumberBefore?: number;
   type: 'added' | 'context' | 'removed';
+}
+
+export interface ISideBySideDiffRow {
+  before?: ILineDiffEntry;
+  after?: ILineDiffEntry;
 }

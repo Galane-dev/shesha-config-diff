@@ -1,6 +1,8 @@
 import { CodeOutlined } from '@ant-design/icons';
-import { Collapse, Empty, Space, Tag, Typography } from 'antd';
+import { Collapse, Empty, Segmented, Space, Tag, Typography } from 'antd';
 import type { CollapseProps } from 'antd';
+import { useState } from 'react';
+import type { DiffViewMode } from '../types/diff';
 import type { IDiffSelection } from '../types/ui';
 import { useAppStyles } from '../styles/use-app-styles';
 import { ChangeTypeTag } from './ChangeTypeTag';
@@ -10,10 +12,10 @@ interface IChangeDetailsProps {
   selection?: IDiffSelection;
 }
 
-const createCollapseItems = (selection: IDiffSelection): CollapseProps['items'] =>
+const createCollapseItems = (selection: IDiffSelection, viewMode: DiffViewMode): CollapseProps['items'] =>
   selection.component?.propertyChanges.map((change) => ({
     children: (
-      <ValueComparison after={change.after} before={change.before} isScript={change.isScript} />
+      <ValueComparison after={change.after} before={change.before} isScript={change.isScript} viewMode={viewMode} />
     ),
     key: change.id,
     label: (
@@ -27,6 +29,7 @@ const createCollapseItems = (selection: IDiffSelection): CollapseProps['items'] 
 
 export const ChangeDetails = ({ selection }: IChangeDetailsProps): React.JSX.Element => {
   const { styles } = useAppStyles();
+  const [viewMode, setViewMode] = useState<DiffViewMode>('side-by-side');
 
   if (!selection) {
     return (
@@ -55,25 +58,39 @@ export const ChangeDetails = ({ selection }: IChangeDetailsProps): React.JSX.Ele
         <ChangeTypeTag changeType={selection.changeType} />
       </div>
 
+      <div className={styles.diffViewToolbar}>
+        <Segmented<DiffViewMode>
+          aria-label="Diff view"
+          onChange={setViewMode}
+          options={[
+            { label: 'Side by Side', value: 'side-by-side' },
+            { label: 'Inline', value: 'inline' },
+          ]}
+          size="small"
+          value={viewMode}
+        />
+      </div>
+
       <div style={{ marginTop: 18 }}>
         {selection.value && (
           <ValueComparison
             after={selection.value.after}
             before={selection.value.before}
             isScript={selection.value.isScript}
+            viewMode={viewMode}
           />
         )}
 
         {component && component.propertyChanges.length > 0 && (
           <Collapse
             defaultActiveKey={[component.propertyChanges[0]?.id ?? '']}
-            items={createCollapseItems(selection)}
+            items={createCollapseItems(selection, viewMode)}
             size="small"
           />
         )}
 
         {component && component.propertyChanges.length === 0 && (
-          <ValueComparison after={component.after} before={component.before} />
+          <ValueComparison after={component.after} before={component.before} viewMode={viewMode} />
         )}
       </div>
     </article>
