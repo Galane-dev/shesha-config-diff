@@ -46,6 +46,10 @@ Files with duplicate or missing component IDs are accepted with warnings. Compon
 
 Component discovery includes direct children, wizard steps, tabs, columns, and panel header/content slots. Child changes are listed individually; parent comparisons retain the container settings without duplicating its child definitions.
 
+Scripts inside action/configuration arrays have their own diffs under the owning component. Configured items, buttons, and actions are grouped by their names, with changed settings and scripts nested underneath. Wizard steps show their number and configured title (falling back to label, name, or just the number). Numbers use the After order, or the Before order for removed steps. Array items are matched by ID or key where available (otherwise by position); ordering changes are shown separately. Exact configuration paths remain available on hover and in exported reports.
+
+Table entries also use column captions, dialog titles, bound property names, or action names when a button label is unavailable.
+
 ## Local Development
 
 Prerequisites:

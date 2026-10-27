@@ -1,5 +1,6 @@
 import type { DiffFilter, IFormDiff, IValueChange } from '../../types/diff';
 import type { IDiffSelection } from '../../types/ui';
+import { getChangeLabel } from './change-labels';
 import { stringifyJsonValue } from './json-utils';
 
 const createValueSelection = (
@@ -11,7 +12,7 @@ const createValueSelection = (
   id: change.id,
   isScript: change.isScript,
   kind: 'value',
-  label: change.path,
+  label: getChangeLabel(change),
   value: change,
 });
 
@@ -23,7 +24,7 @@ const matchesSearch = (selection: IDiffSelection, searchText: string): boolean =
   const valueText = selection.value
     ? `${stringifyJsonValue(selection.value.before)} ${stringifyJsonValue(selection.value.after)}`
     : '';
-  const searchable = `${selection.label} ${selection.description} ${selection.changeType} ${valueText}`.toLowerCase();
+  const searchable = `${selection.label} ${selection.value?.path ?? ''} ${selection.description} ${selection.changeType} ${valueText}`.toLowerCase();
 
   return searchable.includes(searchText.toLowerCase());
 };

@@ -5,6 +5,8 @@ import { useState } from 'react';
 import type { DiffViewMode } from '../types/diff';
 import type { IDiffSelection } from '../types/ui';
 import { useAppStyles } from '../styles/use-app-styles';
+import { groupChanges } from '../utils/diff/group-changes';
+import type { IChangePanel } from '../utils/diff/group-changes';
 import { ChangeTypeTag } from './ChangeTypeTag';
 import { ValueComparison } from './ValueComparison';
 
@@ -12,20 +14,35 @@ interface IChangeDetailsProps {
   selection?: IDiffSelection;
 }
 
-const createCollapseItems = (selection: IDiffSelection, viewMode: DiffViewMode): CollapseProps['items'] =>
-  selection.component?.propertyChanges.map((change) => ({
-    children: (
-      <ValueComparison after={change.after} before={change.before} isScript={change.isScript} viewMode={viewMode} />
+const createCollapseItems = (panels: IChangePanel[], viewMode: DiffViewMode): CollapseProps['items'] =>
+  panels.map((panel) => ({
+    children: panel.change ? (
+      <ValueComparison
+        after={panel.change.after}
+        before={panel.change.before}
+        isScript={panel.change.isScript}
+        viewMode={viewMode}
+      />
+    ) : (
+      <Collapse
+        defaultActiveKey={[panel.children[0]?.key ?? '']}
+        ghost
+        items={createCollapseItems(panel.children, viewMode)}
+        size="small"
+        styles={{ body: { padding: '0 0 8px 4px' }, header: { paddingInline: 4 } }}
+      />
     ),
-    key: change.id,
+    key: panel.key,
     label: (
       <Space size={8} wrap>
-        {change.isScript && <CodeOutlined />}
-        <Typography.Text code>{change.path}</Typography.Text>
-        <Tag>{change.changeType}</Tag>
+        {panel.change?.isScript && <CodeOutlined />}
+        <Typography.Text title={panel.path} style={{ overflowWrap: 'anywhere' }}>{panel.label}</Typography.Text>
+        {panel.change ? <Tag>{panel.change.changeType}</Tag> : (
+          <Tag>{panel.changeCount} {panel.changeCount === 1 ? 'change' : 'changes'}</Tag>
+        )}
       </Space>
     ),
-  })) ?? [];
+  }));
 
 export const ChangeDetails = ({ selection }: IChangeDetailsProps): React.JSX.Element => {
   const { styles } = useAppStyles();
@@ -40,6 +57,7 @@ export const ChangeDetails = ({ selection }: IChangeDetailsProps): React.JSX.Ele
   }
 
   const component = selection.component;
+  const panels = component ? groupChanges(component.propertyChanges) : [];
 
   return (
     <article className={styles.changeDetail}>
@@ -48,8 +66,8 @@ export const ChangeDetails = ({ selection }: IChangeDetailsProps): React.JSX.Ele
           <Typography.Title level={3} style={{ fontSize: 17, margin: 0 }}>
             {selection.label}
           </Typography.Title>
-          <span className={styles.detailPath}>
-            {component?.path ?? selection.value?.path}
+          <span className={styles.detailPath} title={selection.value?.path}>
+            {component?.path ?? (selection.value?.groups?.length ? selection.description : selection.value?.path)}
           </span>
           {component?.previousPath && (
             <span className={styles.detailPath}>Previously: {component.previousPath}</span>
@@ -84,8 +102,8 @@ export const ChangeDetails = ({ selection }: IChangeDetailsProps): React.JSX.Ele
         {component && component.propertyChanges.length > 0 && (
           <Collapse
             key={component.id}
-            defaultActiveKey={[component.propertyChanges[0]?.id ?? '']}
-            items={createCollapseItems(selection, viewMode)}
+            defaultActiveKey={[panels[0]?.key ?? '']}
+            items={createCollapseItems(panels, viewMode)}
             size="small"
           />
         )}

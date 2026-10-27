@@ -167,7 +167,7 @@ describe('compareForms', () => {
 
     expect(result.componentChanges).toHaveLength(1);
     expect(result.componentChanges[0]?.componentId).toBe('wizard');
-    expect(result.componentChanges[0]?.propertyChanges[0]?.path).toBe('steps');
+    expect(result.componentChanges[0]?.propertyChanges[0]?.path).toBe('steps.@order');
   });
 
   it('preserves sibling ordering inside nested collections', () => {
@@ -218,5 +218,22 @@ describe('compareForms', () => {
     expect(result.componentChanges).toHaveLength(1);
     expect(result.componentChanges[0]?.componentId).toBe('select');
     expect(result.componentChanges[0]?.propertyChanges[0]?.path).toBe('options');
+  });
+
+  it('keeps nested action scripts under their owning component and in the Scripts filter', () => {
+    const button = (expression: string): ISheshaComponent => ({
+      id: 'buttons', type: 'buttonGroup', label: 'Actions', items: [{
+        id: 'save', label: 'Save', actionConfiguration: { actionArguments: { expression } },
+      }],
+    });
+    const result = compareComponents([button('return data;')], [button('return data.id;')]);
+
+    expect(result.componentChanges).toHaveLength(1);
+    expect(result.componentChanges[0]?.componentId).toBe('buttons');
+    expect(result.componentChanges[0]?.propertyChanges).toHaveLength(1);
+    expect(result.scriptChanges).toHaveLength(1);
+    expect(result.scriptChanges[0]?.path).toBe('items[id="save"].actionConfiguration.actionArguments.expression');
+    expect(result.counts.components).toBe(1);
+    expect(result.counts.scripts).toBe(1);
   });
 });
