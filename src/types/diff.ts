@@ -6,11 +6,17 @@ export type DiffScope = 'component' | 'form-setting';
 export type DiffFilter = 'all' | 'components' | 'form-settings' | 'scripts';
 export type DiffViewMode = 'side-by-side' | 'inline';
 
+export interface IChangeGroup {
+  label: string;
+  path: string;
+}
+
 export interface IValueChange {
   after?: JsonValue;
   before?: JsonValue;
   changeType: Exclude<DiffChangeType, 'moved'>;
   id: string;
+  groups?: IChangeGroup[];
   isScript: boolean;
   path: string;
   propertyName: string;
