@@ -1,10 +1,13 @@
 export type AiProviderId = 'anthropic' | 'gemini' | 'openai' | 'openai-compatible';
 
-export interface IAiSettings {
-  apiKey: string;
+export interface IAiPreferences {
   endpoint: string;
   model: string;
   provider: AiProviderId;
+}
+
+export interface IAiSettings extends IAiPreferences {
+  apiKey: string;
 }
 
 export interface IAiProviderDefinition {

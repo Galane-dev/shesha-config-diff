@@ -49,6 +49,6 @@ test('compares two form exports', async ({ page }) => {
   await expect(page.getByText('"components": [')).toHaveCount(2);
 
   await page.getByRole('button', { name: 'Open AI provider settings' }).click();
-  await expect(page.getByText('Local browser storage')).toBeVisible();
+  await expect(page.getByText('API key is not saved')).toBeVisible();
   expect(browserErrors).toEqual([]);
 });

@@ -6,14 +6,14 @@ import type { IAiSettings, AiProviderId } from '../types/ai';
 import { useAppStyles } from '../styles/use-app-styles';
 
 interface IAiSettingsDrawerProps {
-  onClear: () => void;
+  onClearKey: () => void;
   onClose: () => void;
   onSave: (settings: IAiSettings) => void;
   settings: IAiSettings;
 }
 
 export const AiSettingsDrawer = ({
-  onClear,
+  onClearKey,
   onClose,
   onSave,
   settings,
@@ -43,8 +43,8 @@ export const AiSettingsDrawer = ({
       width={440}
     >
       <Alert
-        description="The key is stored unencrypted in this browser's local storage. Use this option only on a trusted device."
-        message="Local browser storage"
+        description="The API key stays in memory and is forgotten on refresh or when this page closes. Page scripts and privileged extensions may still access it while in use. Use only a trusted browser and provider endpoint."
+        message="API key is not saved"
         showIcon
         style={{ marginBottom: 20 }}
         type="warning"
@@ -79,7 +79,7 @@ export const AiSettingsDrawer = ({
           <Input.Password
             autoComplete="off"
             onChange={(event) => setDraft((current) => ({ ...current, apiKey: event.target.value }))}
-            placeholder="Stored on this device"
+            placeholder="Not saved; re-enter after refreshing"
             value={draft.apiKey}
           />
         </Form.Item>
@@ -94,12 +94,12 @@ export const AiSettingsDrawer = ({
           danger
           icon={<DeleteOutlined />}
           onClick={() => {
-            onClear();
+            onClearKey();
             onClose();
           }}
           type="text"
         >
-          Clear settings
+          Clear key
         </Button>
         <Button
           disabled={!isComplete}

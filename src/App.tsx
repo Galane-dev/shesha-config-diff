@@ -5,10 +5,8 @@ import { ComparisonEmptyState } from './components/ComparisonEmptyState';
 import { DiffSummary } from './components/DiffSummary';
 import { DiffWorkspace } from './components/DiffWorkspace';
 import { UploadSection } from './components/UploadSection';
-import { AI_SETTINGS_STORAGE_KEY } from './constants/app';
-import { DEFAULT_AI_SETTINGS } from './constants/ai-providers';
 import { APP_THEME } from './constants/theme';
-import { useLocalStorage } from './hooks/use-local-storage';
+import { useAiSettings } from './hooks/use-ai-settings';
 import { useAppStyles } from './styles/use-app-styles';
 import type { IUploadedForm } from './types/shesha-form';
 import { compareForms } from './utils/diff/compare-forms';
@@ -26,10 +24,7 @@ export const App = (): React.JSX.Element => {
   const [beforeSlot, setBeforeSlot] = useState<IFileSlotState>({});
   const [afterSlot, setAfterSlot] = useState<IFileSlotState>({});
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [aiSettings, setAiSettings, clearAiSettings] = useLocalStorage(
-    AI_SETTINGS_STORAGE_KEY,
-    DEFAULT_AI_SETTINGS,
-  );
+  const [aiSettings, setAiSettings, clearAiKey] = useAiSettings();
   const diff = useMemo(
     () => beforeSlot.form && afterSlot.form
       ? compareForms(beforeSlot.form, afterSlot.form)
@@ -115,7 +110,7 @@ export const App = (): React.JSX.Element => {
         {isSettingsOpen && (
           <Suspense fallback={null}>
             <AiSettingsDrawer
-              onClear={clearAiSettings}
+              onClearKey={clearAiKey}
               onClose={() => setIsSettingsOpen(false)}
               onSave={setAiSettings}
               settings={aiSettings}
