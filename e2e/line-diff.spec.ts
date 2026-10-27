@@ -73,6 +73,29 @@ test('shows aligned line changes for JSON and scripts on desktop and mobile', as
     expect(geometry.pageFits).toBe(true);
     await page.getByRole('region', { name: 'Diff content' }).focus();
     await scriptDiff.screenshot({ animations: 'disabled', path: testInfo.outputPath(`script-diff-${viewport.width}.png`) });
+
+    await page.getByRole('radiogroup', { name: 'Diff view' }).getByText('Inline', { exact: true }).click();
+    const inlineDiff = page.getByRole('table', { name: 'Script line diff' });
+    await expect(inlineDiff.getByRole('columnheader')).toHaveText(['Before', 'After', '', 'Content']);
+    const removedRow = inlineDiff.getByRole('row').filter({ hasText: '//console.log' });
+    const addedRow = inlineDiff.getByRole('row').filter({ hasText: 'console.log' }).filter({ hasNotText: '//console.log' });
+    await expect(removedRow).toHaveCSS('background-color', 'rgb(255, 240, 240)');
+    await expect(addedRow).toHaveCSS('background-color', 'rgb(234, 247, 238)');
+    await expect(inlineDiff.locator('code').filter({ hasText: 'form.setFieldsValue({});' })).toHaveCount(1);
+    expect(await inlineDiff.evaluate((table) => table.scrollWidth <= table.clientWidth)).toBe(true);
+    await inlineDiff.screenshot({ animations: 'disabled', path: testInfo.outputPath(`inline-diff-${viewport.width}.png`) });
+    await page.getByRole('article').screenshot({
+      animations: 'disabled', path: testInfo.outputPath(`inline-view-${viewport.width}.png`),
+    });
+
+    await page.getByRole('button', { name: /formSettings.dataLoadersSettings.gql.fieldsToFetch/ }).click();
+    await expect(page.getByRole('radio', { name: 'Inline', exact: true })).toBeChecked();
+    const inlineJson = page.getByRole('table', { name: 'Value line diff' });
+    await expect(inlineJson.getByRole('row').filter({ hasText: 'npo.applicationRef' }))
+      .toHaveCSS('background-color', 'rgb(255, 240, 240)');
+    await page.getByRole('radiogroup', { name: 'Diff view' }).getByText('Side by Side', { exact: true }).click();
+    await expect(page.getByRole('table', { name: 'Value line diff' }).getByRole('columnheader'))
+      .toHaveText(['Before', 'After']);
   }
 
   expect(browserErrors).toEqual([]);
@@ -132,4 +155,16 @@ test('highlights only changed lines inside a large wizard steps value', async ({
   await page.getByRole('region', { name: 'Diff content' }).screenshot({
     animations: 'disabled', path: testInfo.outputPath('large-wizard-diff.png'),
   });
+
+  await page.getByRole('radiogroup', { name: 'Diff view' }).getByText('Inline', { exact: true }).click();
+  const inlineDiff = page.getByRole('table', { name: 'Value line diff' });
+  const inlineCounts = await inlineDiff.evaluate((table) => {
+    const rows = Array.from(table.querySelectorAll('tbody tr'));
+    return {
+      removed: rows.filter((row) => getComputedStyle(row).backgroundColor === 'rgb(255, 240, 240)').length,
+      added: rows.filter((row) => getComputedStyle(row).backgroundColor === 'rgb(234, 247, 238)').length,
+    };
+  });
+  expect(inlineCounts).toEqual({ removed: 1, added: 1 });
+  await expect(inlineDiff.locator('code').filter({ hasText: '"id": "field-0"' })).toHaveCount(1);
 });
