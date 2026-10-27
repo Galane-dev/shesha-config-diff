@@ -41,4 +41,46 @@ describe('parseSheshaForm', () => {
     expect(result.uploadedForm?.warnings).toHaveLength(2);
     expect(result.uploadedForm?.warnings.join(' ')).toContain('same-id');
   });
+
+  it('finds duplicate and missing IDs inside nested structural slots', () => {
+    const result = parseSheshaForm(JSON.stringify({
+      components: [{ id: 'wizard', type: 'wizard', steps: [{
+        id: 'details', components: [
+          { id: 'same-id', type: 'textField' },
+          { type: 'textField' },
+          { id: 'panel', type: 'collapsiblePanel', content: { components: [
+            { id: 'same-id', type: 'button' },
+            { type: 'textField' },
+          ] } },
+        ],
+      }] }],
+      formSettings: {},
+    }), 'example.form.json');
+
+    expect(result.uploadedForm?.warnings).toHaveLength(2);
+    expect(result.uploadedForm?.warnings.join(' ')).toContain('2 component(s) have no ID');
+    expect(result.uploadedForm?.warnings.join(' ')).toContain('same-id');
+  });
+
+  it('does not treat layout slots or ordinary data as components needing IDs', () => {
+    const result = parseSheshaForm(JSON.stringify({
+      components: [{
+        id: 'grid', type: 'columns', columns: [{ label: 'Unnamed column', components: [{ id: 'field', type: 'textField' }] }],
+        options: [{ components: [{ type: 'example' }] }],
+      }],
+      formSettings: {},
+    }), 'example.form.json');
+
+    expect(result.uploadedForm?.warnings).toEqual([]);
+  });
+
+  it('handles a non-string nested component ID without crashing', () => {
+    const result = parseSheshaForm(JSON.stringify({
+      components: [{ id: 'parent', type: 'container', content: { components: [{ id: 42, type: 'textField' }] } }],
+      formSettings: {},
+    }), 'example.form.json');
+
+    expect(result.error).toBeUndefined();
+    expect(result.uploadedForm?.warnings.join(' ')).toContain('1 component(s) have no ID');
+  });
 });

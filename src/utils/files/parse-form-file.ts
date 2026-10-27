@@ -7,6 +7,7 @@ import type {
   ISheshaFormExport,
   IUploadedForm,
 } from '../../types/shesha-form';
+import { getComponentStructure } from '../forms/component-structure';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -60,14 +61,14 @@ const collectComponentIdWarnings = (components: ISheshaComponent[]): string[] =>
 
   const visit = (items: ISheshaComponent[]): void => {
     items.forEach((component) => {
-      if (component.id?.trim()) {
+      if (typeof component.id === 'string' && component.id.trim()) {
         idCounts.set(component.id, (idCounts.get(component.id) ?? 0) + 1);
       } else {
         componentsWithoutIds += 1;
       }
 
-      if (Array.isArray(component.components)) {
-        visit(component.components);
+      for (const collection of getComponentStructure(component).children) {
+        visit(collection.components);
       }
     });
   };

@@ -101,20 +101,17 @@ test('shows aligned line changes for JSON and scripts on desktop and mobile', as
   expect(browserErrors).toEqual([]);
 });
 
-test('highlights only changed lines inside a large wizard steps value', async ({ page }, testInfo) => {
-  const wizardForm = (changedLabel: string): string => JSON.stringify({
+test('highlights only changed lines inside a large configuration value', async ({ page }, testInfo) => {
+  const optionsForm = (changedLabel: string): string => JSON.stringify({
     components: [{
-      id: 'wizard-1',
-      componentName: 'Wizard1',
-      type: 'wizard',
-      steps: [{
-        id: 'details',
-        components: Array.from({ length: 200 }, (_, index) => ({
-          id: `field-${index}`,
-          label: index === 100 ? changedLabel : `Field ${index}`,
-          type: 'textField',
-        })),
-      }],
+      id: 'select-1',
+      componentName: 'Choice',
+      type: 'dropdown',
+      options: Array.from({ length: 200 }, (_, index) => ({
+        id: `field-${index}`,
+        label: index === 100 ? changedLabel : `Field ${index}`,
+        type: 'option',
+      })),
     }],
     formSettings: {},
   });
@@ -122,14 +119,14 @@ test('highlights only changed lines inside a large wizard steps value', async ({
   await page.goto('/');
   const files = page.locator('input[type="file"]');
   await files.nth(0).setInputFiles({
-    buffer: Buffer.from(wizardForm('Field 100')),
+    buffer: Buffer.from(optionsForm('Field 100')),
     mimeType: 'application/json',
-    name: 'example.module.wizard.json',
+    name: 'example.module.options.json',
   });
   await files.nth(1).setInputFiles({
-    buffer: Buffer.from(wizardForm('Updated field 100')),
+    buffer: Buffer.from(optionsForm('Updated field 100')),
     mimeType: 'application/json',
-    name: 'example.module.wizard.json',
+    name: 'example.module.options.json',
   });
 
   const diff = page.getByRole('table', { name: 'Value line diff' });
@@ -153,7 +150,7 @@ test('highlights only changed lines inside a large wizard steps value', async ({
   await expect(changedRow.getByRole('cell').nth(1).locator('code')).toHaveText('"label": "Updated field 100",');
   await changedRow.scrollIntoViewIfNeeded();
   await page.getByRole('region', { name: 'Diff content' }).screenshot({
-    animations: 'disabled', path: testInfo.outputPath('large-wizard-diff.png'),
+    animations: 'disabled', path: testInfo.outputPath('large-value-diff.png'),
   });
 
   await page.getByRole('radiogroup', { name: 'Diff view' }).getByText('Inline', { exact: true }).click();

@@ -5,8 +5,9 @@ import type {
   IFormDiff,
   IValueChange,
 } from '../../types/diff';
-import type { JsonValue } from '../../types/json';
+import type { IJsonObject, JsonValue } from '../../types/json';
 import type { ISheshaComponent, IUploadedForm } from '../../types/shesha-form';
+import { getComponentStructure } from '../forms/component-structure';
 import { compareValues } from './compare-values';
 
 interface IIndexedComponent {
@@ -16,6 +17,7 @@ interface IIndexedComponent {
   label: string;
   parentKey: string;
   path: string;
+  properties: IJsonObject;
   siblingIndex: number;
   type: string;
 }
@@ -48,6 +50,7 @@ const createComponentIndex = (components: ISheshaComponent[]): Map<string, IInde
 
       const fallbackKey = `${parentKey}/anonymous:${getString(component.type) ?? 'unknown'}:${getString(component.propertyName) ?? label}:${siblingIndex}`;
       const key = componentId ? `id:${componentId}${occurrence > 1 ? `#${occurrence}` : ''}` : fallbackKey;
+      const structure = getComponentStructure(component);
 
       index.set(key, {
         component,
@@ -56,12 +59,15 @@ const createComponentIndex = (components: ISheshaComponent[]): Map<string, IInde
         label,
         parentKey,
         path,
+        properties: structure.properties,
         siblingIndex,
         type: getString(component.type) ?? 'unknown',
       });
 
-      if (Array.isArray(component.components)) {
-        visit(component.components, key, path);
+      for (const collection of structure.children) {
+        const parentKey = collection.key === 'components' ? key : `${key}/${collection.key}`;
+        const parentPath = collection.label ? `${path} / ${collection.label}` : path;
+        visit(collection.components, parentKey, parentPath);
       }
     });
   };
@@ -149,12 +155,11 @@ const compareComponents = (
 
     const locationChanges = createLocationChanges(before, after);
     const propertyChanges = compareValues({
-      after: after.component,
-      before: before.component,
+      after: after.properties,
+      before: before.properties,
       basePath: '',
       idPrefix: key,
       scope: 'component',
-      skipProperties: new Set(['components']),
     });
     const allPropertyChanges = [...locationChanges, ...propertyChanges];
 
