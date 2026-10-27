@@ -10,7 +10,7 @@ A local-first visual comparison tool for exported [Shesha](https://github.com/sh
 - Matches nested components primarily by stable Shesha component ID.
 - Separates component, form-setting, script, expression, and ordering changes.
 - Ignores object-key ordering while preserving meaningful array ordering.
-- Shows line-level diffs for lifecycle scripts, validators, and dynamic expressions.
+- Shows side-by-side line diffs for settings, scripts, validators, and dynamic expressions, with additions and removals highlighted.
 - Exports a deterministic Markdown report for reviews and pull requests.
 - Optionally asks a user-selected AI provider to explain the computed diff.
 

@@ -56,3 +56,8 @@ export interface ILineDiffEntry {
   lineNumberBefore?: number;
   type: 'added' | 'context' | 'removed';
 }
+
+export interface ISideBySideDiffRow {
+  before?: ILineDiffEntry;
+  after?: ILineDiffEntry;
+}

@@ -134,12 +134,49 @@ export const useAppStyles = createStyles(({ css, token }) => ({
     background: #ffffff;
     font-size: 12px;
     line-height: 1.55;
+
+    &:focus-visible {
+      outline: 2px solid ${token.colorPrimary};
+      outline-offset: -2px;
+    }
+  `,
+  codeTable: css`
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+  `,
+  codeHeader: css`
+    position: sticky;
+    z-index: 1;
+    top: 0;
+    padding: 7px 11px;
+    border-bottom: 1px solid ${token.colorBorderSecondary};
+    background: #fbfcfd;
+    color: ${token.colorTextSecondary};
+    text-align: left;
+    font-weight: 600;
+  `,
+  codeCell: css`
+    padding: 0;
+    border-right: 1px solid ${token.colorBorderSecondary};
+    vertical-align: top;
+
+    &:last-child {
+      border-right: 0;
+    }
+  `,
+  codeCellEmpty: css`
+    background: #f6f8fa;
   `,
   codeLine: css`
     display: grid;
-    grid-template-columns: 42px 42px 22px minmax(0, 1fr);
+    grid-template-columns: 42px 22px minmax(0, 1fr);
     min-height: 22px;
-    white-space: pre;
+
+    @media (max-width: 720px) {
+      grid-template-columns: 28px 16px minmax(0, 1fr);
+    }
   `,
   codeLineAdded: css`
     background: #eaf7ee;
@@ -148,8 +185,10 @@ export const useAppStyles = createStyles(({ css, token }) => ({
     background: #fff0f0;
   `,
   codeLineContent: css`
-    overflow: visible;
+    min-width: 0;
     padding: 1px 10px 1px 4px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
   `,
   codeLineMarker: css`
     padding: 1px 5px;
@@ -341,17 +380,6 @@ export const useAppStyles = createStyles(({ css, token }) => ({
     gap: 12px;
     margin-top: 24px;
   `,
-  sideBySide: css`
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    overflow: hidden;
-    border: 1px solid ${token.colorBorderSecondary};
-    border-radius: 4px;
-
-    @media (max-width: 760px) {
-      grid-template-columns: minmax(0, 1fr);
-    }
-  `,
   summaryBar: css`
     display: flex;
     align-items: center;
@@ -407,39 +435,6 @@ export const useAppStyles = createStyles(({ css, token }) => ({
     display: grid;
     gap: 10px;
     margin-bottom: 18px;
-  `,
-  valuePane: css`
-    min-width: 0;
-    border-right: 1px solid ${token.colorBorderSecondary};
-
-    &:last-child {
-      border-right: 0;
-    }
-
-    @media (max-width: 760px) {
-      border-right: 0;
-      border-bottom: 1px solid ${token.colorBorderSecondary};
-    }
-  `,
-  valuePre: css`
-    max-height: 380px;
-    min-height: 86px;
-    margin: 0;
-    overflow: auto;
-    padding: 12px;
-    background: #ffffff;
-    font-size: 12px;
-    line-height: 1.55;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-  `,
-  valueTitle: css`
-    padding: 7px 11px;
-    border-bottom: 1px solid ${token.colorBorderSecondary};
-    background: #fbfcfd;
-    color: ${token.colorTextSecondary};
-    font-size: 12px;
-    font-weight: 600;
   `,
   warningList: css`
     margin: 0;
