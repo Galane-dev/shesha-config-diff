@@ -11,6 +11,7 @@ A local-first visual comparison tool for exported [Shesha](https://github.com/sh
 - Separates component, form-setting, script, expression, and ordering changes.
 - Ignores object-key ordering while preserving meaningful array ordering.
 - Switches between Side by Side and Inline views for settings, scripts, validators, and dynamic expressions, with additions and removals highlighted.
+- Reviews recognised scripts and static configuration for logging, failure handling, async completion, runtime access, syntax and configuration concerns in a separate **Review Concerns** tab.
 - Exports a deterministic Markdown report for reviews and pull requests.
 - Optionally asks a user-selected AI provider to explain the computed diff.
 
@@ -49,6 +50,24 @@ Component discovery includes direct children, wizard steps, tabs, columns, and p
 Scripts inside action/configuration arrays have their own diffs under the owning component. Configured items, buttons, and actions are grouped by their names, with changed settings and scripts nested underneath. Wizard steps show their number and configured title (falling back to label, name, or just the number). Numbers use the After order, or the Before order for removed steps. Array items are matched by ID or key where available (otherwise by position); ordering changes are shown separately. Exact configuration paths remain available on hover and in exported reports.
 
 Table entries also use column captions, dialog titles, bound property names, or action names when a button label is unavailable.
+
+## Review Concerns
+
+This read-only review runs locally using Acorn's JavaScript parser and AST walker. Uploaded scripts are never executed. Findings remain separate from configuration-diff counts and the Markdown diff report; AI is not used for these checks.
+
+- **Console usage:** direct calls such as `console.log`, `console.error`, static bracket access, and supported browser-global equivalents. Comments, string contents, and locally declared `console` objects are not treated as browser console calls. `console.error` is logging, not a thrown exception.
+- **Sensitive logging:** heuristics for full form/request objects and personal or secret-looking arguments, including email, mobile and password fields. A warning is a review prompt, not proof that sensitive information is present or exposed.
+- **Failure handling:** empty catch blocks and inline or locally declared rejection handlers that only log. Explicit recovery values, feedback and rethrows are not classified as logging-only recovery.
+- **Promises and completion:** detached known HTTP/fetch/Promise calls without rejection handling, and requests that completion-sensitive hooks do not wait for. Simple promise variables, returned/awaited chains, combinators and inline wrappers are recognised. Ordinary callbacks, unknown consumers and manual Promise executors are treated conservatively; custom control flow may not be understood.
+- **Runtime access:** partially guarded optional chains such as `data?.npo.type`, including grouped chains. Fully optional access and common truthy/non-null guards are recognised. The reviewer does not know the model's nullability guarantees or perform full control-flow analysis.
+- **Syntax review:** parsing failures with original source locations. Known visibility/edit-mode settings are reviewed as synchronous bodies; form lifecycle hooks and before-navigation wizard actions use asynchronous bodies. Unknown/custom contexts remain permissive about `await`. Shesha-provided variables are not reported as undefined. Context inference does not replace validation against the deployed framework/editor version.
+- **Configuration risks:** static local/test URLs, remote HTTP URLs and possible embedded credentials in scripts or plain JSON settings. Environment markers and credential names/formats are heuristics; a public/restricted client key is not necessarily a secret. Obvious placeholders are skipped. No URL is contacted or credential tested.
+
+Both exports are scanned, including unchanged scripts, scripts in added/removed components and suspicious static configuration values. Findings are **New**, **Existing**, or **Resolved**, matched by source identity and parsed statement/static value rather than line number. **Unverified** means a version could not be fully checked, so introduction/resolution cannot be established. Syntax failures stop the other AST checks for that script; scripts or candidate values over 250,000 characters and parser resource limits are explicitly reported as incomplete.
+
+The review recognises explicit `_code` settings and known raw script fields, including lifecycle hooks, action expressions and form arguments. Inactive value-mode code is skipped. It does not fully trace aliases, dynamically computed methods, runtime values or data flow; unknown/custom script fields may not be recognised. No findings does not certify that a form is safe or correct. Detected credential values are masked across review evidence for the same analysed source, preserving source positions. This is not complete redaction: the original upload, Raw JSON, diff report and existing AI behaviour are unchanged. Review screenshots and exports before sharing them.
+
+Script rules live in `src/utils/review/rules/` and share the parser, scope helpers, source locations and finding comparison. Extend `ReviewRule`, add a rule to `SCRIPT_RULES` and its label to `REVIEW_RULE_LABELS`; the existing filters pick up the new category. Static configuration uses the same finding/status format without attempting to parse values as JavaScript.
 
 ## Local Development
 
@@ -104,6 +123,7 @@ src/
     files/           Export parsing and validation
     forms/           Shared component structure discovery
     report/          Local Markdown report generation
+    review/          Local script collection, AST checks and finding comparison
 tests/               Unit tests for comparison behavior
 e2e/                 Browser workflow tests
 ```

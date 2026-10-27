@@ -22,3 +22,11 @@ Users should:
 Memory-only storage does not protect a key from malicious scripts running in the page, sufficiently privileged extensions, device malware, or inspection of outgoing requests. The application cannot reliably detect all such threats. Keys must be available to the browser while authenticating provider requests.
 
 The application redacts common token formats and secret-looking properties before an AI request, but redaction is defensive rather than a guarantee. Never place production secrets in form configuration exports.
+
+## Script Review
+
+Review Concerns parses recognised JavaScript without executing it. It does not use `eval`, construct executable functions, or load uploaded code as modules. Review findings are generated locally and are not automatically sent to an AI provider or added to the diff report.
+
+Sensitive-logging, credential, URL, async and runtime checks are heuristics, not a complete security audit or type/data-flow analysis. They do not contact detected endpoints, test credentials or execute callbacks. Public/restricted browser keys are not automatically private secrets, and environment-like hostnames do not prove a deployment error.
+
+Evidence is displayed as literal text, not HTML. Detected static credential values are masked in review evidence and full-source views, including other findings from that analysed source. Masking preserves line positions but is not comprehensive: malformed/unrecognised code and unsupported formats can escape detection. Raw JSON, the original files, diff reports and existing AI redaction behaviour are unchanged. Take care when sharing screenshots, exports or copied evidence. Parsing failures and resource limits prevent complete analysis; no findings must not be interpreted as a safety guarantee.
