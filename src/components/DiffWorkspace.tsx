@@ -9,7 +9,7 @@ import { createDiffSelections } from '../utils/diff/create-selections';
 import { ChangeDetails } from './ChangeDetails';
 import { ChangeNavigation } from './ChangeNavigation';
 
-const AiExplanationPanel = lazy(() => import('./AiExplanationPanel'));
+const AiReviewPanel = lazy(() => import('./AiReviewPanel'));
 const RawComparison = lazy(() => import('./RawComparison'));
 const ReviewConcernsPanel = lazy(() => import('./ReviewConcernsPanel'));
 
@@ -91,16 +91,17 @@ export const DiffWorkspace = ({
           {
             children: (
               <Suspense fallback={<Spin fullscreen={false} />}>
-                <AiExplanationPanel
+                <AiReviewPanel
                   diff={diff}
+                  latestForm={afterForm.form}
                   onOpenSettings={onOpenSettings}
                   settings={aiSettings}
                 />
               </Suspense>
             ),
-            icon: <RobotOutlined />,
+            icon: <RobotOutlined aria-hidden="true" />,
             key: 'ai',
-            label: 'AI explanation',
+            label: 'AI review',
           },
         ]}
         tabBarStyle={{ margin: 0, paddingInline: 16 }}
