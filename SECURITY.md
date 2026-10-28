@@ -17,11 +17,13 @@ Users should:
 - Send keys only to trusted HTTPS endpoints. A custom endpoint receives the supplied key; an untrusted CORS proxy can expose it too.
 - Clear the key after use, particularly on a shared device. Avoid sharing screenshots or network logs containing credentials.
 - Revoke or rotate a key with its provider if it may have been exposed.
-- Review the computed diff before sending it to an AI provider.
+- Inspect the AI request preview before sending. It includes redacted latest-form context, including unchanged configuration, the diff and selected local review findings; it is not limited to changed values.
 
 Memory-only storage does not protect a key from malicious scripts running in the page, sufficiently privileged extensions, device malware, or inspection of outgoing requests. The application cannot reliably detect all such threats. Keys must be available to the browser while authenticating provider requests.
 
 The application redacts common token formats and secret-looking properties before an AI request, but redaction is defensive rather than a guarantee. Never place production secrets in form configuration exports.
+
+AI review is explicitly opt-in. Source context is bounded, and omitted or shortened content is reported. The provider response is parsed and validated locally, displayed as text and restricted to supplied After-form references. No suggested code is executed or automatically applied. Prompt isolation and output validation reduce risk but cannot guarantee factual correctness or prevent all prompt injection. Cancelling aborts the browser request; data already sent cannot be recalled, and the provider may continue processing or charging for it.
 
 ## Script Review
 
@@ -29,4 +31,4 @@ Review Concerns parses recognised JavaScript without executing it. It does not u
 
 Sensitive-logging, credential, URL, async and runtime checks are heuristics, not a complete security audit or type/data-flow analysis. They do not contact detected endpoints, test credentials or execute callbacks. Public/restricted browser keys are not automatically private secrets, and environment-like hostnames do not prove a deployment error.
 
-Evidence is displayed as literal text, not HTML. Detected static credential values are masked in review evidence and full-source views, including other findings from that analysed source. Masking preserves line positions but is not comprehensive: malformed/unrecognised code and unsupported formats can escape detection. Raw JSON, the original files, diff reports and existing AI redaction behaviour are unchanged. Take care when sharing screenshots, exports or copied evidence. Parsing failures and resource limits prevent complete analysis; no findings must not be interpreted as a safety guarantee.
+Evidence is displayed as literal text, not HTML. Detected static credential values are masked in review evidence and full-source views, including other findings from that analysed source. Masking preserves line positions but is not comprehensive: malformed/unrecognised code and unsupported formats can escape detection. AI request redaction also has these limitations. Raw JSON, the original files and diff reports are unchanged. Take care when sharing screenshots, exports or copied evidence. Parsing failures and resource limits prevent complete analysis; no findings must not be interpreted as a safety guarantee.

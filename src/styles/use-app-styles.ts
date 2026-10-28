@@ -1,33 +1,6 @@
 import { createStyles } from 'antd-style';
 
 export const useAppStyles = createStyles(({ css, token }) => ({
-  aiContent: css`
-    max-width: 880px;
-    color: ${token.colorText};
-    line-height: 1.65;
-
-    h1, h2, h3 {
-      margin-top: 22px;
-      margin-bottom: 8px;
-      letter-spacing: 0;
-    }
-
-    h1 { font-size: 20px; }
-    h2 { font-size: 17px; }
-    h3 { font-size: 15px; }
-
-    pre {
-      overflow: auto;
-      padding: 12px;
-      border: 1px solid ${token.colorBorderSecondary};
-      border-radius: 4px;
-      background: #f6f8fa;
-    }
-  `,
-  aiPanel: css`
-    min-height: 420px;
-    padding: 20px 24px 32px;
-  `,
   app: css`
     min-height: 100vh;
     background: ${token.colorBgLayout};

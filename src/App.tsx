@@ -101,7 +101,7 @@ export const App = (): React.JSX.Element => {
 
           <footer className={styles.footer}>
             <Typography.Text type="secondary">
-              Comparisons run locally. Files leave the browser only when an AI explanation is requested.
+              Comparisons run locally. Form context is sent only when an AI review is requested.
             </Typography.Text>
             <Typography.Text type="secondary">Open source · No backend</Typography.Text>
           </footer>
