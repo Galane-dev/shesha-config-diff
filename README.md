@@ -13,9 +13,9 @@ A local-first visual comparison tool for exported [Shesha](https://github.com/sh
 - Switches between Side by Side and Inline views for settings, scripts, validators, and dynamic expressions, with additions and removals highlighted.
 - Reviews recognised scripts and static configuration for logging, failure handling, async completion, runtime access, syntax and configuration concerns in a separate **Review Concerns** tab.
 - Exports a deterministic Markdown report for reviews and pull requests.
-- Optionally asks a user-selected AI provider to explain the computed diff.
+- Optionally asks a user-selected AI provider for a concise change summary, improvements and edge cases based on the latest form.
 
-The deterministic comparison is always the source of truth. AI is an optional explanation layer and does not decide whether two exports differ.
+The deterministic comparison is always the source of truth. AI review is optional and does not decide whether two exports differ.
 
 ## Privacy Model
 
@@ -25,8 +25,9 @@ There is no application backend.
 - Uploaded files are not persisted and are cleared when the page is closed or refreshed.
 - Only non-secret AI preferences (provider, model, and endpoint) are saved in browser local storage.
 - The API key stays in memory only. Refreshing or closing the page forgets it; **Clear key** removes it from the active settings without resetting saved preferences.
-- An AI request is made only when the user selects **Explain diff**.
-- Only the computed diff is sent. Likely credentials and tokens are redacted first; raw form exports are not sent.
+- An AI request is made only when the user selects **Review latest form** or **Regenerate review**.
+- The request includes a redacted diff, bounded After-form configuration context (including unchanged components/settings), and selected local review findings. This is broader than diff-only sharing. The original export file is not uploaded as a file, but its configuration content is included in the derived context.
+- Inspect **Request context** before sending. Credential redaction is best-effort, not a guarantee: remove personal data and secrets from exports before sharing with any provider.
 
 Memory-only storage reduces persistent exposure; it does not hide the key from page scripts, privileged browser extensions, device malware, or browser request inspection while it is in use. Use a trusted device and browser, and send keys only to trusted HTTPS provider endpoints. Use a dedicated, restricted key and provider-supported usage controls. If a key may have been exposed, revoke or rotate it with the provider; clearing it here does not revoke it.
 
@@ -68,6 +69,18 @@ Both exports are scanned, including unchanged scripts, scripts in added/removed 
 The review recognises explicit `_code` settings and known raw script fields, including lifecycle hooks, action expressions and form arguments. Inactive value-mode code is skipped. It does not fully trace aliases, dynamically computed methods, runtime values or data flow; unknown/custom script fields may not be recognised. No findings does not certify that a form is safe or correct. Detected credential values are masked across review evidence for the same analysed source, preserving source positions. This is not complete redaction: the original upload, Raw JSON, diff report and existing AI behaviour are unchanged. Review screenshots and exports before sharing them.
 
 Script rules live in `src/utils/review/rules/` and share the parser, scope helpers, source locations and finding comparison. Extend `ReviewRule`, add a rule to `SCRIPT_RULES` and its label to `REVIEW_RULE_LABELS`; the existing filters pick up the new category. Static configuration uses the same finding/status format without attempting to parse values as JavaScript.
+
+## AI Review
+
+The **AI review** tab shows a short change summary, up to three suggested improvements, and up to three edge cases with expected behaviour. Recommendations and source context are collapsed initially. Each recommendation must reference a supplied After-form location; expanding it shows the actual redacted source, not AI-generated code.
+
+Before is used only in the change-summary context. Recommendations use the latest After configuration, including unchanged settings/components, with selected current Review Concerns as heuristic evidence. Uploaded text is treated as untrusted data, never executed or followed as instructions. AI can still make mistakes: recommendations are review prompts, not confirmed bugs, and no findings does not certify correctness.
+
+Requests are limited to 60,000 characters, with individual values and locations shortened where necessary. Form-level context and individually extracted scripts/configuration risks are prioritised before component settings; script targets retain their inferred execution context and completion requirements. Partial context and omitted locations are explicitly reported. The request preview shows the actual derived payload. No automatic requests, retries, fixes or persistence of reviews are performed. Cancelling, replacing an export, changing provider settings or clearing the key aborts the active browser request and discards stale results; this cannot withdraw data already received by the provider or guarantee that billing stops.
+
+All four existing providers use the same prompted JSON contract and local validation. Unsupported, malformed, invented-reference or incomplete responses produce an error rather than an unstructured essay. This is deliberately provider-neutral, not a guarantee of schema-constrained generation for every configured model. The OpenAI adapter keeps its existing Responses API transport and `store: false`; see the [official structured-output guidance](https://developers.openai.com/api/docs/guides/structured-outputs?api-mode=responses) for provider-specific schema enforcement.
+
+The implementation separates request collection/redaction (`create-review-request.ts`, `sanitize-value.ts`), instructions (`review-prompt.ts`), response validation (`parse-review.ts`), transport (`review-form.ts`), request lifecycle (`use-ai-review.ts`) and presentation (`AiReviewResult.tsx`).
 
 ## Local Development
 
